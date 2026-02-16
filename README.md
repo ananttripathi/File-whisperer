@@ -28,7 +28,7 @@ Upload an airplane manual and get a flight support assistant. Upload the Merck M
 - 🧠 AI answers grounded only in your document — no hallucinations
 - 📍 Source citations — see exactly which part of the doc the answer came from
 - 🎭 Persona switching — acts as a medical expert, flight support, legal analyst, etc.
-- 🔒 Bring Your Own Key — users can provide their own Gemini/OpenAI API key
+- 🔑 Bring Your Own Key (BYOK) — users paste their own free Gemini key so you never pay API costs regardless of traffic
 - 🌙 Dark mode support
 - 📱 Fully responsive UI
 
@@ -394,7 +394,120 @@ Deploy in this exact order:
 | Render | 750 hrs/month | Enough for 1 service |
 | Vercel | Unlimited | No limit on frontend |
 
-**Pro tip:** Add a "Bring Your Own Key" (BYOK) option in settings where users paste their own Gemini API key. This means you never hit the limit, no matter how many users you have.
+---
+
+## 🔑 Bring Your Own Key (BYOK)
+
+DocChat supports **BYOK** — users can paste their own free Gemini API key directly in the app. This means:
+
+- You **never hit the API rate limit** no matter how many users you have
+- You **never pay a cent** in API costs, ever
+- Users get their **own isolated quota** — one heavy user can't affect others
+
+### How It Works
+
+1. User clicks the **⚙️ Settings** icon in the top right
+2. Pastes their free Gemini API key (obtained from [ai.google.dev](https://ai.google.dev) — no credit card needed)
+3. Key is stored in their browser's `localStorage` — it never touches your server
+4. Every API request uses their key instead of the server's default key
+
+### How to Get a Free Gemini Key (for your users)
+
+Share these steps with users:
+
+```
+1. Go to https://ai.google.dev
+2. Click "Get API key in Google AI Studio"
+3. Sign in with a Google account
+4. Click "Create API key"
+5. Copy and paste it into DocChat settings
+```
+
+### Backend Implementation
+
+Your FastAPI backend should accept an optional API key header and fall back to the server default:
+
+```python
+# server/routers/chat.py
+
+from fastapi import Header
+from services.gemini import get_gemini_response
+
+@router.post("/chat")
+async def chat(
+    request: ChatRequest,
+    x_api_key: str | None = Header(default=None)  # User's BYOK key
+):
+    # Use user's key if provided, otherwise fall back to server default
+    api_key = x_api_key or os.getenv("GEMINI_API_KEY")
+    response = await get_gemini_response(request, api_key)
+    return response
+```
+
+### Frontend Implementation
+
+Store the key in `localStorage` and attach it to every request:
+
+```javascript
+// client/src/services/api.js
+
+const getUserApiKey = () => localStorage.getItem("gemini_api_key");
+
+export const askQuestion = async (documentId, question) => {
+  const userKey = getUserApiKey();
+
+  return fetch(`${API_URL}/api/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(userKey && { "X-Api-Key": userKey }), // attach key if present
+    },
+    body: JSON.stringify({ documentId, question }),
+  });
+};
+```
+
+### API Key Modal Component
+
+Add a simple settings modal in React:
+
+```jsx
+// client/src/components/ApiKeyModal.jsx
+
+export default function ApiKeyModal({ onClose }) {
+  const [key, setKey] = useState(localStorage.getItem("gemini_api_key") || "");
+
+  const handleSave = () => {
+    if (key.trim()) {
+      localStorage.setItem("gemini_api_key", key.trim());
+    } else {
+      localStorage.removeItem("gemini_api_key");
+    }
+    onClose();
+  };
+
+  return (
+    <div className="modal">
+      <h2>🔑 Your Gemini API Key</h2>
+      <p>
+        Get a free key at{" "}
+        <a href="https://ai.google.dev" target="_blank">ai.google.dev</a>.
+        Your key is stored locally and never sent to our servers.
+      </p>
+      <input
+        type="password"
+        placeholder="AIza..."
+        value={key}
+        onChange={(e) => setKey(e.target.value)}
+      />
+      <button onClick={handleSave}>Save</button>
+      <button onClick={onClose}>Cancel</button>
+    </div>
+  );
+}
+```
+
+> 🔒 **Privacy note:** The user's API key is stored only in their own browser via `localStorage`. It is never logged or stored on your server.
 
 ---
 
@@ -404,6 +517,7 @@ Deploy in this exact order:
 - [x] RAG pipeline with Gemini
 - [x] Source citations
 - [x] Persona switching
+- [x] Bring Your Own Key (BYOK) support
 - [ ] Multi-file support (chat across multiple documents)
 - [ ] Chat history persistence
 - [ ] User authentication
