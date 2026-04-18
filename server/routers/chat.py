@@ -6,7 +6,7 @@ import httpx
 
 router = APIRouter()
 
-COHERE_GENERATE_URL = "https://api.cohere.ai/v1/generate"
+COHERE_CHAT_URL = "https://api.cohere.ai/v1/chat"
 
 SYSTEM_PROMPT = """You are a helpful assistant that answers questions strictly based on the provided document excerpts.
 If the answer is not found in the excerpts, say "I couldn't find that in the document."
@@ -53,20 +53,18 @@ async def chat(
     preamble = f"{SYSTEM_PROMPT}\n\nDocument excerpts:\n\n{context}"
 
     try:
-        prompt = f"{preamble}\n\nQuestion: {req.question}\nAnswer:"
         resp = httpx.post(
-            COHERE_GENERATE_URL,
+            COHERE_CHAT_URL,
             headers={"Authorization": f"Bearer {x_api_key}"},
             json={
-                "model": "command",
-                "prompt": prompt,
-                "max_tokens": 512,
-                "temperature": 0.3,
+                "model": "command-r-08-2024",
+                "message": req.question,
+                "preamble": preamble,
             },
             timeout=60,
         )
         resp.raise_for_status()
-        answer = resp.json()["generations"][0]["text"].strip()
+        answer = resp.json()["text"]
     except Exception as e:
         raise HTTPException(502, f"LLM request failed: {e}")
 
