@@ -2,7 +2,7 @@ import httpx
 
 EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBED_DIM = 384
-HF_EMBED_URL = f"https://api-inference.huggingface.co/models/{EMBED_MODEL}"
+HF_EMBED_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{EMBED_MODEL}"
 
 
 def embed_texts(texts: list[str], api_key: str) -> list[list[float]]:
