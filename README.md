@@ -1,8 +1,8 @@
-# 📄 DocChat — Chat With Any Document
+# 🗂️ File Whisperer — Chat With Any Document
 
-> Upload a PDF. Ask anything. Get expert answers — powered by AI.
+> Upload a PDF, DOCX, or TXT. Ask anything. Get expert answers — powered by AI.
 
-Upload an airplane manual and get a flight support assistant. Upload the Merck Manual and get a medical reference expert. Upload a legal contract and get a document analyst. **DocChat turns any document into a conversational AI expert.**
+Upload an airplane manual and get a flight support assistant. Upload the Merck Manual and get a medical reference expert. Upload a legal contract and get a document analyst. **File Whisperer turns any document into a conversational AI expert.**
 
 ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi)
@@ -30,7 +30,7 @@ Upload an airplane manual and get a flight support assistant. Upload the Merck M
 - 🧠 AI answers grounded only in your document — no hallucinations
 - 📍 Source citations — see exactly which part of the doc the answer came from
 - 🎭 Persona switching — acts as a medical expert, flight support, legal analyst, etc.
-- 🔑 Bring Your Own Key (BYOK) — users paste their own free Gemini key so you never pay API costs regardless of traffic
+- 🔑 Bring Your Own Key (BYOK) — users paste their own free Cohere key so you never pay API costs regardless of traffic
 - 🌙 Dark mode support
 - 📱 Fully responsive UI
 
@@ -53,12 +53,10 @@ This app uses a technique called **RAG (Retrieval Augmented Generation)**. Inste
         ↓
  Question → vector → find most similar chunks
         ↓
- Relevant chunks + question → sent to Gemini
+ Relevant chunks + question → sent to Cohere
         ↓
- Gemini answers based only on the document ✅
+ Cohere answers based only on the document ✅
 ```
-
-> **MVP shortcut:** Gemini 1.5 Flash accepts entire PDFs as input natively, so for smaller documents you can skip the vector step entirely and send the whole PDF to the model directly.
 
 ---
 
@@ -70,8 +68,8 @@ This app uses a technique called **RAG (Retrieval Augmented Generation)**. Inste
 | Backend | Python + FastAPI | [Render](https://render.com) | Free |
 | Database + Vector store | Supabase (pgvector) | [Supabase](https://supabase.com) | Free |
 | File storage | Supabase Storage | [Supabase](https://supabase.com) | Free |
-| AI model | Gemini 1.5 Flash | [Google AI](https://ai.google.dev) | Free tier |
-| Embeddings | Gemini Embeddings | [Google AI](https://ai.google.dev) | Free tier |
+| AI model | Cohere command-r | [Cohere](https://cohere.com) | Free tier |
+| Embeddings | Cohere Embeddings | [Cohere](https://cohere.com) | Free tier |
 
 **Total hosting cost: $0** for personal use and portfolio projects.
 
@@ -80,7 +78,7 @@ This app uses a technique called **RAG (Retrieval Augmented Generation)**. Inste
 ## 📁 Project Structure
 
 ```
-docchat/
+file-whisperer/
 ├── client/                          # React frontend
 │   ├── public/
 │   ├── src/
@@ -109,7 +107,7 @@ docchat/
 │   │   ├── chunker.py               # Split text into chunks
 │   │   ├── embeddings.py            # Generate vector embeddings
 │   │   ├── vector_store.py          # Supabase pgvector operations
-│   │   └── gemini.py                # Gemini API integration
+│   │   └── embeddings.py            # Cohere embeddings + chat
 │   ├── models/
 │   │   └── schemas.py               # Pydantic request/response models
 │   ├── db/
@@ -129,15 +127,15 @@ docchat/
 - [Node.js](https://nodejs.org/) v18+
 - [Python](https://www.python.org/) 3.11+
 - A [Supabase](https://supabase.com) account (free)
-- A [Google AI Studio](https://ai.google.dev) account for Gemini API key (free)
+- A [Cohere](https://cohere.com) account for a free API key
 
 ---
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/docchat.git
-cd docchat
+git clone https://github.com/ananttripathi/File-whisperer.git
+cd File-whisperer
 ```
 
 ---
@@ -160,7 +158,7 @@ cp .env.example .env
 Fill in the values:
 
 ```env
-GEMINI_API_KEY=your_gemini_api_key_here
+COHERE_API_KEY=your_cohere_api_key_here
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=your_supabase_service_role_key
 CORS_ORIGIN=http://localhost:5173
@@ -181,7 +179,7 @@ Backend runs at `http://localhost:8000`. API docs available at `http://localhost
 Run the contents of [`server/db/schema.sql`](server/db/schema.sql) in your Supabase SQL Editor. It will:
 
 1. Enable the `pgvector` extension
-2. Create the `chunks` table with a `vector(768)` column (Gemini embedding dimension)
+2. Create the `chunks` table with a `vector(384)` column (Cohere embedding dimension)
 3. Create an ivfflat index for fast cosine similarity search
 4. Create the `match_chunks` SQL function used by the backend for retrieval
 
@@ -313,11 +311,11 @@ Deploy in this exact order:
 3. Go to **Storage** → create a bucket called `documents` and set it to private
 4. Copy your **Project URL** and **service role key** from Settings → API
 
-### Step 2 — 🤖 Get Your Gemini API Key
+### Step 2 — 🤖 Get Your Cohere API Key
 
-1. Go to [ai.google.dev](https://ai.google.dev) → **Get API key**
-2. Create a free API key — no credit card required
-3. Free tier: **1,500 requests/day, 15 requests/minute**
+1. Go to [dashboard.cohere.com/api-keys](https://dashboard.cohere.com/api-keys)
+2. Sign up for a free account — no credit card required
+3. Create an API key and copy it
 
 ### Step 3 — ⚙️ Backend on [Render](https://render.com)
 
@@ -329,7 +327,7 @@ Deploy in this exact order:
    ```
 4. Add environment variables in the Render dashboard:
    ```env
-   GEMINI_API_KEY=your_key
+   COHERE_API_KEY=your_key
    SUPABASE_URL=your_supabase_url
    SUPABASE_KEY=your_supabase_service_key
    CORS_ORIGIN=https://file-whisperer1.vercel.app
@@ -355,7 +353,7 @@ Deploy in this exact order:
 
 | Variable | Local | Production |
 |----------|-------|------------|
-| `GEMINI_API_KEY` | Your Gemini key | Same (set in Render) |
+| `COHERE_API_KEY` | Your Cohere key | Same (set in Render) |
 | `SUPABASE_URL` | Your Supabase URL | Same (set in Render) |
 | `SUPABASE_KEY` | Supabase service key | Same (set in Render) |
 | `CORS_ORIGIN` | `http://localhost:5173` | Your Vercel URL |
@@ -369,7 +367,7 @@ Deploy in this exact order:
 
 | Limit | Free Allowance | Tips |
 |-------|---------------|------|
-| Gemini requests | 1,500/day | Each chat message = 1 request |
+| Cohere requests | 1,000/month (free tier) | Each chat message = 1 request |
 | Supabase DB | 50MB | ~500k chunks stored |
 | Supabase Storage | 500MB | ~250 average PDFs |
 | Render | 750 hrs/month | Enough for 1 service |
@@ -379,7 +377,7 @@ Deploy in this exact order:
 
 ## 🔑 Bring Your Own Key (BYOK)
 
-DocChat supports **BYOK** — users can paste their own free Gemini API key directly in the app. This means:
+File Whisperer supports **BYOK** — users can paste their own free Cohere API key directly in the app. This means:
 
 - You **never hit the API rate limit** no matter how many users you have
 - You **never pay a cent** in API costs, ever
@@ -388,20 +386,19 @@ DocChat supports **BYOK** — users can paste their own free Gemini API key dire
 ### How It Works
 
 1. User clicks the **⚙️ Settings** icon in the top right
-2. Pastes their free Gemini API key (obtained from [ai.google.dev](https://ai.google.dev) — no credit card needed)
+2. Pastes their free Cohere API key (obtained from [dashboard.cohere.com/api-keys](https://dashboard.cohere.com/api-keys) — no credit card needed)
 3. Key is stored in their browser's `localStorage` — it never touches your server
 4. Every API request uses their key instead of the server's default key
 
-### How to Get a Free Gemini Key (for your users)
+### How to Get a Free Cohere Key (for your users)
 
 Share these steps with users:
 
 ```
-1. Go to https://ai.google.dev
-2. Click "Get API key in Google AI Studio"
-3. Sign in with a Google account
-4. Click "Create API key"
-5. Copy and paste it into DocChat settings
+1. Go to https://dashboard.cohere.com/api-keys
+2. Sign up for a free account
+3. Click "New API key"
+4. Copy and paste it into File Whisperer settings
 ```
 
 ### Backend Implementation
@@ -409,20 +406,17 @@ Share these steps with users:
 Your FastAPI backend should accept an optional API key header and fall back to the server default:
 
 ```python
-# server/routers/chat.py
+# routers/chat.py
 
 from fastapi import Header
-from services.gemini import get_gemini_response
 
 @router.post("/chat")
 async def chat(
     request: ChatRequest,
-    x_api_key: str | None = Header(default=None)  # User's BYOK key
+    x_api_key: str = Header(..., alias="x-api-key")  # User's BYOK key
 ):
-    # Use user's key if provided, otherwise fall back to server default
-    api_key = x_api_key or os.getenv("GEMINI_API_KEY")
-    response = await get_gemini_response(request, api_key)
-    return response
+    query_embedding = embed_query(request.question, x_api_key)
+    # ... rest of chat logic uses x_api_key for Cohere calls
 ```
 
 ### Frontend Implementation
@@ -432,7 +426,7 @@ Store the key in `localStorage` and attach it to every request:
 ```javascript
 // client/src/services/api.js
 
-const getUserApiKey = () => localStorage.getItem("gemini_api_key");
+const getUserApiKey = () => localStorage.getItem("cohere_api_key");
 
 export const askQuestion = async (documentId, question) => {
   const userKey = getUserApiKey();
@@ -456,23 +450,23 @@ Add a simple settings modal in React:
 // client/src/components/ApiKeyModal.jsx
 
 export default function ApiKeyModal({ onClose }) {
-  const [key, setKey] = useState(localStorage.getItem("gemini_api_key") || "");
+  const [key, setKey] = useState(localStorage.getItem("cohere_api_key") || "");
 
   const handleSave = () => {
     if (key.trim()) {
-      localStorage.setItem("gemini_api_key", key.trim());
+      localStorage.setItem("cohere_api_key", key.trim());
     } else {
-      localStorage.removeItem("gemini_api_key");
+      localStorage.removeItem("cohere_api_key");
     }
     onClose();
   };
 
   return (
     <div className="modal">
-      <h2>🔑 Your Gemini API Key</h2>
+      <h2>🔑 Your Cohere API Key</h2>
       <p>
         Get a free key at{" "}
-        <a href="https://ai.google.dev" target="_blank">ai.google.dev</a>.
+        <a href="https://dashboard.cohere.com/api-keys" target="_blank">dashboard.cohere.com</a>.
         Your key is stored locally and never sent to our servers.
       </p>
       <input
@@ -495,7 +489,7 @@ export default function ApiKeyModal({ onClose }) {
 ## 🗺️ Roadmap
 
 - [x] PDF, DOCX, and TXT upload and parsing
-- [x] RAG pipeline with Gemini 1.5 Flash
+- [x] RAG pipeline with Cohere command-r
 - [x] Source citations
 - [x] Bring Your Own Key (BYOK) support
 - [x] Dark mode + responsive UI
@@ -509,7 +503,7 @@ export default function ApiKeyModal({ onClose }) {
 ---
 
 ## 🧪 Running Tests
-xadsoj-7xiqNo-baxpyf
+
 ```bash
 # Backend tests
 cd server
