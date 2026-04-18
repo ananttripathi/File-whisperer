@@ -2,8 +2,7 @@ import httpx
 
 EMBED_MODEL = "text-embedding-004"
 EMBED_DIM = 768
-EMBED_URL = "https://generativelanguage.googleapis.com/v1/models/text-embedding-004:batchEmbedContents"
-CHAT_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
+EMBED_URL = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:batchEmbedContents"
 
 
 def embed_texts(texts: list[str], api_key: str) -> list[list[float]]:
