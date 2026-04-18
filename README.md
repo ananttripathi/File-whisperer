@@ -8,7 +8,7 @@ Upload an airplane manual and get a flight support assistant. Upload the Merck M
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi)
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python)
 ![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E?style=flat-square&logo=supabase)
-![Gemini](https://img.shields.io/badge/AI-Gemini%201.5%20Flash-4285F4?style=flat-square&logo=google)
+![Cohere](https://img.shields.io/badge/AI-Cohere%20command--r-D4A574?style=flat-square&logo=cohere)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 ![Hosted on Vercel](https://img.shields.io/badge/Frontend-Vercel-black?style=flat-square&logo=vercel)
 ![Hosted on Render](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat-square&logo=render)
