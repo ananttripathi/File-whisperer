@@ -1,36 +1,24 @@
 import httpx
 
-EMBED_MODEL = "text-embedding-004"
+EMBED_MODEL = "embedding-001"
 EMBED_DIM = 768
-EMBED_URL = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:batchEmbedContents"
+BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent"
+
+
+def _embed_single(text: str, task_type: str, api_key: str) -> list[float]:
+    payload = {
+        "model": "models/embedding-001",
+        "content": {"parts": [{"text": text}]},
+        "taskType": task_type,
+    }
+    resp = httpx.post(f"{BASE_URL}?key={api_key}", json=payload, timeout=60)
+    resp.raise_for_status()
+    return resp.json()["embedding"]["values"]
 
 
 def embed_texts(texts: list[str], api_key: str) -> list[list[float]]:
-    payload = {
-        "requests": [
-            {
-                "model": f"models/{EMBED_MODEL}",
-                "content": {"parts": [{"text": t}]},
-                "taskType": "RETRIEVAL_DOCUMENT",
-            }
-            for t in texts
-        ]
-    }
-    resp = httpx.post(f"{EMBED_URL}?key={api_key}", json=payload, timeout=60)
-    resp.raise_for_status()
-    return [e["values"] for e in resp.json()["embeddings"]]
+    return [_embed_single(t, "RETRIEVAL_DOCUMENT", api_key) for t in texts]
 
 
 def embed_query(query: str, api_key: str) -> list[float]:
-    payload = {
-        "requests": [
-            {
-                "model": f"models/{EMBED_MODEL}",
-                "content": {"parts": [{"text": query}]},
-                "taskType": "RETRIEVAL_QUERY",
-            }
-        ]
-    }
-    resp = httpx.post(f"{EMBED_URL}?key={api_key}", json=payload, timeout=60)
-    resp.raise_for_status()
-    return resp.json()["embeddings"][0]["values"]
+    return _embed_single(query, "RETRIEVAL_QUERY", api_key)
