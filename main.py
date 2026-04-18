@@ -1,12 +1,7 @@
-print("==> importing fastapi")
 from fastapi import FastAPI
-print("==> importing cors")
 from fastapi.middleware.cors import CORSMiddleware
-print("==> importing dotenv")
 from dotenv import load_dotenv
-print("==> importing routers")
 from routers import upload, chat
-print("==> all imports done")
 
 load_dotenv()
 
