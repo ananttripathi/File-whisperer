@@ -9,7 +9,7 @@ create table if not exists chunks (
   document_id uuid not null,
   filename    text not null,
   content     text not null,
-  embedding   vector(768),
+  embedding   vector(384),
   chunk_index integer not null,
   created_at  timestamptz default now()
 );
@@ -24,7 +24,7 @@ create index if not exists chunks_document_id_idx on chunks (document_id);
 
 -- 5. Similarity search function used by the backend
 create or replace function match_chunks(
-  query_embedding   vector(768),
+  query_embedding   vector(384),
   match_document_id uuid,
   match_count       int default 5
 )
