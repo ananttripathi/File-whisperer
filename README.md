@@ -160,7 +160,7 @@ Fill in the values:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_supabase_service_role_key
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key
 CORS_ORIGIN=http://localhost:5173
 ```
 
@@ -176,33 +176,12 @@ Backend runs at `http://localhost:8000`. API docs available at `http://localhost
 
 ### 3. Database Setup (Supabase)
 
-Run the following SQL in your Supabase SQL editor to enable pgvector and create the required tables:
+Run the contents of [`server/db/schema.sql`](server/db/schema.sql) in your Supabase SQL Editor. It will:
 
-```sql
--- Enable the pgvector extension
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- Store uploaded documents
-CREATE TABLE documents (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  filename    TEXT NOT NULL,
-  file_url    TEXT NOT NULL,
-  created_at  TIMESTAMP DEFAULT NOW()
-);
-
--- Store document chunks with their vector embeddings
-CREATE TABLE chunks (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  document_id  UUID REFERENCES documents(id) ON DELETE CASCADE,
-  content      TEXT NOT NULL,
-  page_number  INTEGER,
-  embedding    vector(768),       -- Gemini embedding dimension
-  created_at   TIMESTAMP DEFAULT NOW()
-);
-
--- Create an index for fast similarity search
-CREATE INDEX ON chunks USING ivfflat (embedding vector_cosine_ops);
-```
+1. Enable the `pgvector` extension
+2. Create the `chunks` table with a `vector(768)` column (Gemini embedding dimension)
+3. Create an ivfflat index for fast cosine similarity search
+4. Create the `match_chunks` SQL function used by the backend for retrieval
 
 ---
 
@@ -513,15 +492,15 @@ export default function ApiKeyModal({ onClose }) {
 
 ## 🗺️ Roadmap
 
-- [x] PDF upload and parsing
-- [x] RAG pipeline with Gemini
+- [x] PDF, DOCX, and TXT upload and parsing
+- [x] RAG pipeline with Gemini 1.5 Flash
 - [x] Source citations
-- [x] Persona switching
 - [x] Bring Your Own Key (BYOK) support
+- [x] Dark mode + responsive UI
 - [ ] Multi-file support (chat across multiple documents)
 - [ ] Chat history persistence
 - [ ] User authentication
-- [ ] Support for DOCX, TXT, and Markdown files
+- [x] Support for DOCX and TXT files
 - [ ] Export chat as PDF
 - [ ] Highlight source text in document viewer
 
