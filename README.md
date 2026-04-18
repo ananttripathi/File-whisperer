@@ -15,9 +15,11 @@ Upload an airplane manual and get a flight support assistant. Upload the Merck M
 
 ---
 
-## 📸 Demo
+## 🚀 Live Demo
 
-> _Add a screenshot or GIF of your app here_
+**[https://file-whisperer1.vercel.app](https://file-whisperer1.vercel.app)**
+
+> Frontend: Vercel · Backend: Render (`file-whisperer-api`) · DB: Supabase
 
 ---
 
@@ -330,9 +332,9 @@ Deploy in this exact order:
    GEMINI_API_KEY=your_key
    SUPABASE_URL=your_supabase_url
    SUPABASE_KEY=your_supabase_service_key
-   CORS_ORIGIN=https://your-app.vercel.app
+   CORS_ORIGIN=https://file-whisperer1.vercel.app
    ```
-5. Deploy — you'll get a URL like `https://docchat-api.onrender.com`
+5. Deploy — your backend URL: `https://file-whisperer-api.onrender.com`
 
 > ⚠️ **Cold starts:** Free Render tier sleeps after 15 mins idle. First request takes ~30s to wake up.
 
@@ -340,12 +342,12 @@ Deploy in this exact order:
 
 1. Update `client/.env` with your Render backend URL:
    ```env
-   VITE_API_URL=https://docchat-api.onrender.com
+   VITE_API_URL=https://file-whisperer-api.onrender.com/api
    ```
 2. Push your `client/` folder to GitHub
 3. Sign up at [vercel.com](https://vercel.com) → **New Project** → import your repo
 4. Set **Root Directory** to `client/`
-5. Deploy — you'll get a URL like `https://docchat.vercel.app`
+5. Deploy — your frontend URL: `https://file-whisperer1.vercel.app`
 
 ---
 
@@ -357,7 +359,7 @@ Deploy in this exact order:
 | `SUPABASE_URL` | Your Supabase URL | Same (set in Render) |
 | `SUPABASE_KEY` | Supabase service key | Same (set in Render) |
 | `CORS_ORIGIN` | `http://localhost:5173` | Your Vercel URL |
-| `VITE_API_URL` | `http://localhost:8000` | Your Render URL |
+| `VITE_API_URL` | `http://localhost:8000` | `https://file-whisperer-api.onrender.com/api` |
 
 > **Never push `.env` files to GitHub.** Both `.env` files are already in `.gitignore`.
 
