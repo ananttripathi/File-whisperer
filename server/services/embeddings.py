@@ -1,27 +1,27 @@
 import httpx
 
-EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_MODEL = "embed-english-light-v3.0"
 EMBED_DIM = 384
-HF_EMBED_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{EMBED_MODEL}"
+COHERE_EMBED_URL = "https://api.cohere.ai/v1/embed"
 
 
 def embed_texts(texts: list[str], api_key: str) -> list[list[float]]:
     resp = httpx.post(
-        HF_EMBED_URL,
+        COHERE_EMBED_URL,
         headers={"Authorization": f"Bearer {api_key}"},
-        json={"inputs": texts},
+        json={"texts": texts, "model": EMBED_MODEL, "input_type": "search_document"},
         timeout=60,
     )
     resp.raise_for_status()
-    return resp.json()
+    return resp.json()["embeddings"]
 
 
 def embed_query(query: str, api_key: str) -> list[float]:
     resp = httpx.post(
-        HF_EMBED_URL,
+        COHERE_EMBED_URL,
         headers={"Authorization": f"Bearer {api_key}"},
-        json={"inputs": [query]},
+        json={"texts": [query], "model": EMBED_MODEL, "input_type": "search_query"},
         timeout=60,
     )
     resp.raise_for_status()
-    return resp.json()[0]
+    return resp.json()["embeddings"][0]

@@ -6,7 +6,7 @@ import httpx
 
 router = APIRouter()
 
-HF_CHAT_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+COHERE_CHAT_URL = "https://api.cohere.ai/v1/chat"
 
 SYSTEM_PROMPT = """You are a helpful assistant that answers questions strictly based on the provided document excerpts.
 If the answer is not found in the excerpts, say "I couldn't find that in the document."
@@ -50,24 +50,21 @@ async def chat(
         f"[Excerpt {i+1}]:\n{m['content']}" for i, m in enumerate(matches)
     )
 
-    prompt = f"<s>[INST] {SYSTEM_PROMPT}\n\nDocument excerpts:\n\n{context}\n\nQuestion: {req.question} [/INST]"
+    preamble = f"{SYSTEM_PROMPT}\n\nDocument excerpts:\n\n{context}"
 
     try:
         resp = httpx.post(
-            HF_CHAT_URL,
+            COHERE_CHAT_URL,
             headers={"Authorization": f"Bearer {x_api_key}"},
             json={
-                "inputs": prompt,
-                "parameters": {
-                    "max_new_tokens": 512,
-                    "return_full_text": False,
-                    "temperature": 0.3,
-                },
+                "model": "command-r",
+                "message": req.question,
+                "preamble": preamble,
             },
             timeout=60,
         )
         resp.raise_for_status()
-        answer = resp.json()[0]["generated_text"].strip()
+        answer = resp.json()["text"]
     except Exception as e:
         raise HTTPException(502, f"LLM request failed: {e}")
 
