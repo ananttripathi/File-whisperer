@@ -1,6 +1,7 @@
-import fitz  # PyMuPDF
+import io
 import docx
 from pathlib import Path
+from pypdf import PdfReader
 
 
 def parse_file(file_bytes: bytes, filename: str) -> str:
@@ -16,11 +17,10 @@ def parse_file(file_bytes: bytes, filename: str) -> str:
 
 
 def _parse_pdf(file_bytes: bytes) -> str:
-    doc = fitz.open(stream=file_bytes, filetype="pdf")
-    return "\n".join(page.get_text() for page in doc)
+    reader = PdfReader(io.BytesIO(file_bytes))
+    return "\n".join(page.extract_text() or "" for page in reader.pages)
 
 
 def _parse_docx(file_bytes: bytes) -> str:
-    import io
     doc = docx.Document(io.BytesIO(file_bytes))
     return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
