@@ -2,8 +2,7 @@ from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
 from services.embeddings import embed_query
 from services import vector_store
-import google.generativeai as genai
-import os
+from google import genai
 
 router = APIRouter()
 
@@ -49,22 +48,14 @@ async def chat(
         f"[Excerpt {i+1}]:\n{m['content']}" for i, m in enumerate(matches)
     )
 
-    prompt = f"""Document excerpts:\n\n{context}\n\nQuestion: {req.question}"""
+    prompt = f"{SYSTEM_PROMPT}\n\nDocument excerpts:\n\n{context}\n\nQuestion: {req.question}"
 
     try:
-        genai.configure(api_key=x_api_key)
-        model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            system_instruction=SYSTEM_PROMPT,
+        client = genai.Client(api_key=x_api_key)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt,
         )
-
-        history = [
-            {"role": m["role"], "parts": [m["content"]]}
-            for m in req.history[-6:]  # keep last 3 turns
-        ]
-
-        chat_session = model.start_chat(history=history)
-        response = chat_session.send_message(prompt)
         answer = response.text
     except Exception as e:
         raise HTTPException(502, f"LLM request failed: {e}")
