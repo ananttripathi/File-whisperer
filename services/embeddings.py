@@ -1,7 +1,7 @@
 import google.generativeai as genai
 import os
 
-EMBED_MODEL = "models/text-embedding-004"
+EMBED_MODEL = "models/embedding-001"
 EMBED_DIM = 768
 
 
