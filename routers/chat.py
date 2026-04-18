@@ -6,7 +6,7 @@ import httpx
 
 router = APIRouter()
 
-COHERE_GENERATE_URL = "https://api.cohere.com/v1/generate"
+COHERE_GENERATE_URL = "https://api.cohere.ai/v1/generate"
 
 SYSTEM_PROMPT = """You are a helpful assistant that answers questions strictly based on the provided document excerpts.
 If the answer is not found in the excerpts, say "I couldn't find that in the document."
